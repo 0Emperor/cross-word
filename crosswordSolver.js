@@ -168,8 +168,11 @@ function crossWordAlgo(puzzle, words, curent, solutions) {
         
           if (isSafe("row", words[wordI], puzzle, lineI, charI)) {
             let res = placeWordRow([...puzzle], [...words], wordI, [...curent], lineI, charI)
-
+            // console.log("res", res)
+            // console.log(res.curent)
+            // console.log(res[curent].join('\n'))
             if (res) {
+              console.log(res.curent.join('\n'))
               const check = Check(res.curent)
               if (check) {
                 solutions.push(res.curent)
@@ -247,8 +250,7 @@ function placeWordCol(puzzle, words, wordI, curent, rowI, colI) {
 
 
 
-const puzzle = `
-..1.1..1...
+const puzzle = `..1.1..1...
 10000..1000
 ..0.0..0...
 ..1000000..
