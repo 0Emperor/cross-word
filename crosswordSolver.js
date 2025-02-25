@@ -9,12 +9,6 @@ function validation(puzzle, words) {
 }
 
 
-const puzzle = `2.00
-0..0
-2000
-00.0`
-const words = ['casa', 'alan', 'ciao', 'anta']
-
 
 
 // Create a function to validate and split the input lines of the puzzle:
@@ -78,64 +72,62 @@ function crosswordSolver(puzzle, words) {
   }
 }
 
-console.log(validation(puzzle, words));
 
 // hadi will return true or false based on if 1 or 2 i there and the remaining to the left are 0 to a certainlimit
 function isValidRow(two_dim_array, row_index, start_column) {
   // return false and 0 otherwise true and length
-  let stop = start_column + 1;
+  let stop = - - start_column + 1;
   let len = 1;
   for (let i = stop; i < two_dim_array[row_index].length - start_column; i++) {
-    if (i !== stop && two_dim_array[row_index][i] === ".") {
+
+    if (i != stop && two_dim_array[row_index][i] == ".") {
       return [true, len]
-    } else if (i !== stop && i === (two_dim_array.length - start_column) - 1) {
+    } else if (i != stop && i == (two_dim_array.length - start_column) - 1) {
       return [true, len + 1]
     }
-    else if (two_dim_array[row_index][i] !== ".") {
+    else if (two_dim_array[row_index][i] != ".") {
       len = len + 1
-    } else if (i === stop && two_dim_array[row_index][i] === ".") {
+    } else if (i == stop && two_dim_array[row_index][i] === ".") {
       return [false, 0]
     }
   }
   return [false, 0]
 }
-
 
 
 
 // nfss lblan dyal li 9blha 
 function isValidColumn(two_dim_array, start_row, column_index) {
   let len = 1
-  let stop = start_row + 1
-  for (let i = stop; i < two_dim_array.length - start_row; i++) {
-    console.log("i:", i);
+  let stop = start_row - - 1
 
-    if (i !== stop && two_dim_array[i][column_index] === ".") {
+  for (let i = stop; i < two_dim_array.length - start_row; i++) {
+    if (i != stop && two_dim_array[i][column_index] == ".") {
       return [true, len]
-    } else if (i !== stop && i === (two_dim_array.length - start_row) - 1) {
+    } else if (i != stop && i == (two_dim_array.length - start_row) - 1) {
       return [true, len + 1]
     }
-    else if (two_dim_array[i][column_index] !== ".") {
+    else if (two_dim_array[i][column_index] != ".") {
       len = len + 1
-    } else if (i === stop && two_dim_array[i][column_index] === ".") {
-      console.log(two_dim_array[i][column_index])
+    } else if (i == stop && two_dim_array[i][column_index] == ".") {
       return [false, 0]
     }
   }
   return [false, 0]
 
 }
-
+//
 function isSafe(type, word, two_dim_array, row_index, column_index) {
+
   switch (type) {
     case "row":
       const [ok, len] = isValidRow(two_dim_array, row_index, column_index)
-      if (ok) return word.length === len
-      else return false
+      if (ok) { console.log("len row", len);  return word.length === len;}
+      else {return false;}
     case "column":
       const [ok1, len1] = isValidColumn(two_dim_array, row_index, column_index)
-      if (ok1) return word.length === len1
-      else return false
+      if (ok1)  { console.log("len column", len1);  return word.length === len1;}
+      else {return false;}
     default:
       return false
   }
@@ -145,15 +137,154 @@ function isSafe(type, word, two_dim_array, row_index, column_index) {
 
 
 
-function crosswordSolver(){
-
+function Check(potential) {
+  if (!potential) {
+    return
+  }
+  for (const element of potential) {
+    if (element.join("").match(/(\d)/)) {
+      return
+    }
+  }
+  return true
 }
 
 
 
 
-let valid = validation(puzzle, words)
-console.log("Row validation", isValidRow(valid, 0, 1))
-console.log("Column Validation:", isValidColumn(valid, 0, 0))
-console.log(isSafe("column","casa", valid, 0,0))
 
+function crossWordAlgo(puzzle, words, curent, solutions) {
+  for (const lineI in puzzle) {
+    let line = puzzle[lineI]
+    for (const charI in line) {
+      let char = line[charI]
+      if (char == "1" || char == "2") {
+       
+       
+        for (const wordI in words) {
+          console.log(isSafe("row", words[wordI], puzzle, lineI, charI));
+          console.log(isSafe("column", words[wordI], puzzle, lineI, charI))
+          console.log("lineI", lineI,"charI", charI)
+        
+          if (isSafe("row", words[wordI], puzzle, lineI, charI)) {
+            let res = placeWordRow([...puzzle], [...words], wordI, [...curent], lineI, charI)
+
+            if (res) {
+              const check = Check(res.curent)
+              if (check) {
+                solutions.push(res.curent)
+              }
+              let potential = crossWordAlgo(res.puzzle, res.words, res.curent, solutions)
+              const check1 = Check(potential)
+              if (check1) {
+                return potential
+              }
+            }
+          }
+           
+          if (isSafe("column", words[wordI], puzzle, lineI, charI)) {
+            let res = placeWordCol([...puzzle], [...words], wordI, [...curent], lineI, charI)
+            if (res) {
+              const check = Check(res.curent)
+              if (check) {
+                solutions.push(res.curent)
+              }
+              let potential = crossWordAlgo(res.puzzle, res.words, res.curent, solutions)
+              const check1 = Check(potential)
+              if (check1) {
+                return potential
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  return solutions
+}
+
+
+
+
+
+function placeWordRow(puzzle, words, wordI, curent, rowI, colI) {
+  puzzle[rowI][colI]--
+  let dCol = colI
+  let i = 0
+  while (rowI < curent.length && i < words[wordI].length) {  
+    if (!curent[rowI][colI].match(/[0-2]/g)) {
+      if (curent[rowI][colI] != words[wordI][i]) {
+        puzzle[rowI][dCol]++
+        return null
+      }
+    }
+    curent[rowI][colI] = words[wordI][i]
+    i++
+    colI++
+  }
+  words.splice(wordI, 1)
+  return { puzzle, curent, words }
+}
+
+function placeWordCol(puzzle, words, wordI, curent, rowI, colI) {
+  puzzle[rowI][colI]--
+  let dRow = rowI
+  let i = 0
+  while (colI < curent[0].length && i < words[wordI].length) {
+    if (!curent[rowI][colI].match(/[0-2]/)) {
+      if (curent[rowI][colI] != words[wordI][i]) {
+        puzzle[dRow][colI]++
+        return null
+      }
+    }
+    curent[rowI][colI] = words[wordI][i]
+    i++
+    rowI++
+  }
+  words.splice(wordI, 1)
+  return { puzzle, curent, words }
+}
+
+
+
+const puzzle = `
+..1.1..1...
+10000..1000
+..0.0..0...
+..1000000..
+..0.0..0...
+1000..10000
+..0.1..0...
+....0..0...
+..100000...
+....0..0...
+....0......`
+const words = [
+  'popcorn',
+  'fruit',
+  'flour',
+  'chicken',
+  'eggs',
+  'vegetables',
+  'pasta',
+  'pork',
+  'steak',
+  'cheese',
+]
+function crosswordSolver(puzzle, words) {
+  validated = validation(puzzle, words)
+  if (validated===null){
+    console.log("Error hna")
+  } else {
+      const solutions = crossWordAlgo(validation(puzzle, words), words, validation(puzzle, words), [])
+      if (solutions.length!==1){
+        console.log(solutions.length)
+        console.log("Error lhiiih")
+      } else {
+        console.log(solutions[0])
+      }
+  }
+
+}
+
+crosswordSolver(puzzle, words)
