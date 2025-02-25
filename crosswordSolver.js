@@ -7,13 +7,33 @@ function validation(puzzle, words) {
   let cleanPuzzle = validatePuzzle(puzzle)
   return !!cleanPuzzle && validateEntries(puzzle, words) && wordValidation(words) ? cleanPuzzle : null
 }
-
-
-const puzzle = `2001
-0..0
-1000
-0..0`
-const words = ['casa', 'alan', 'ciao', 'anta']
+const puzzle = `...1...........
+..1000001000...
+...0....0......
+.1......0...1..
+.0....100000000
+100000..0...0..
+.0.....1001000.
+.0.1....0.0....
+.10000000.0....
+.0.0......0....
+.0.0.....100...
+...0......0....
+..........0....`
+const words = [
+  'sun',
+  'sunglasses',
+  'suncream',
+  'swimming',
+  'bikini',
+  'beach',
+  'icecream',
+  'tan',
+  'deckchair',
+  'sand',
+  'seaside',
+  'sandals',
+]
 
 
 
@@ -167,7 +187,6 @@ function crossWordAlgo(puzzle, words, curent, solutions) {
         for (const wordI in words) {
           if (isSafe("row", words[wordI], puzzle, lineI, charI)) {
             let res = placeWordRow([...puzzle], [...words], wordI, [...curent], lineI,charI)
-           
             if (res) {
               const check = Check(res.curent)              
               if (check) {                
@@ -183,7 +202,7 @@ function crossWordAlgo(puzzle, words, curent, solutions) {
 
           if (isSafe("column", words[wordI], puzzle, lineI, charI)) {
             let res = placeWordCol([...puzzle], [...words], wordI, [...curent], lineI,charI)
-          if (res) {
+          if (res) {            
                 const check = Check(res.curent)              
                 if (check) {                
                   solutions.push(res.curent)                
@@ -205,38 +224,51 @@ function crossWordAlgo(puzzle, words, curent, solutions) {
 function placeWordRow(puzzle, words, wordI, curent, rowI, colI) {
   puzzle[rowI][colI]--  
   let dCol = colI
+  let temp = [...curent]
+  console.log(join(curent));
   let i = 0
-  while (rowI < curent.length && i < words[wordI].length) {
-    if (!curent[rowI][colI].match(/[0-2]/)) {
-      if (curent[rowI][colI] != words[wordI][i]) {
+  while (rowI < temp.length && i < words[wordI].length) {
+    if (!temp[rowI][colI].match(/[0-2]/)) {
+      if (temp[rowI][colI] != words[wordI][i]) {
+        console.log("hiii");
+        console.log(join(curent));
         puzzle[rowI][dCol]++
         return null
       }
     }    
-    curent[rowI][colI] = words[wordI][i]
+    temp[rowI][colI] = words[wordI][i]
+
     i++
     colI++
   }
+  curent=temp
   words.splice(wordI, 1)
   return { puzzle, curent, words }
 }
-
+function join(w) {
+  let res =""
+  for (const element of w) {
+    res+=element.join("")+"\n"
+  }
+  return res
+}
 function placeWordCol(puzzle, words, wordI, curent, rowI, colI) {
+  let temp =[...curent]
   puzzle[rowI][colI]--
   let dRow = rowI
   let i = 0
   while (colI < curent[0].length && i < words[wordI].length) {
-    if (!curent[rowI][colI].match(/[0-2]/)) {
-      if (curent[rowI][colI] != words[wordI][i]) {
+    if (!temp[rowI][colI].match(/[0-2]/)) {
+      if (temp[rowI][colI] != words[wordI][i]) {
         puzzle[dRow][colI]++
         return null
       }
     }
-    curent[rowI][colI] = words[wordI][i]
+    temp[rowI][colI] = words[wordI][i]
     i++
     rowI++
   }
-
+curent=temp
   words.splice(wordI, 1)
   return { puzzle, curent, words }
 }
