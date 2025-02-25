@@ -148,6 +148,8 @@ function isSafe(type, word, two_dim_array, row_index, column_index) {
   switch (type) {
     case "row":
       const [ok, len] = isValidRow(two_dim_array, row_index, column_index)
+      console.log((len),word);
+      
       if (ok) return word.length === len
       else return false
     case "column":
@@ -188,14 +190,15 @@ function crossWordAlgo(puzzle, words, curent, solutions) {
           if (isSafe("row", words[wordI], puzzle, lineI, charI)) {
             let res = placeWordRow([...puzzle], [...words], wordI, [...curent], lineI,charI)
             if (res) {
-              const check = Check(res.curent)              
+              const check = Check(res.curent)  
               if (check) {                
                 solutions.push(res.curent)                
-              }
-              let potential = crossWordAlgo(res.puzzle, res.words, res.curent, solutions)             
+              }else{
+                let potential = crossWordAlgo(res.puzzle, res.words, res.curent, solutions)             
               const check1 = Check(potential)              
               if (check1) {                
-                return potential
+                solutions.push(...potential)
+              }
               }
             }
           }
@@ -203,14 +206,15 @@ function crossWordAlgo(puzzle, words, curent, solutions) {
           if (isSafe("column", words[wordI], puzzle, lineI, charI)) {
             let res = placeWordCol([...puzzle], [...words], wordI, [...curent], lineI,charI)
           if (res) {            
-                const check = Check(res.curent)              
-                if (check) {                
+                const check = Check(res.curent)                              
+                if (check) {                                  
                   solutions.push(res.curent)                
-                }
-                let potential = crossWordAlgo(res.puzzle, res.words, res.curent, solutions)             
+                }else{
+                  let potential = crossWordAlgo(res.puzzle, res.words, res.curent, solutions)             
                 const check1 = Check(potential)              
                 if (check1) {                
-                  return potential
+                  solutions.push(...potential)
+                }
                 }
               }
           }
@@ -224,23 +228,21 @@ function crossWordAlgo(puzzle, words, curent, solutions) {
 function placeWordRow(puzzle, words, wordI, curent, rowI, colI) {
   puzzle[rowI][colI]--  
   let dCol = colI
-  let temp = [...curent]
-  console.log(join(curent));
+  let temp = curent.map(arr => arr.map(e => e))
   let i = 0
   while (rowI < temp.length && i < words[wordI].length) {
     if (!temp[rowI][colI].match(/[0-2]/)) {
-      if (temp[rowI][colI] != words[wordI][i]) {
-        console.log("hiii");
-        console.log(join(curent));
+      if (temp[rowI][colI] != words[wordI][i]) {   
         puzzle[rowI][dCol]++
         return null
       }
     }    
     temp[rowI][colI] = words[wordI][i]
-
+    
     i++
     colI++
   }
+  
   curent=temp
   words.splice(wordI, 1)
   return { puzzle, curent, words }
@@ -253,13 +255,15 @@ function join(w) {
   return res
 }
 function placeWordCol(puzzle, words, wordI, curent, rowI, colI) {
-  let temp =[...curent]
+  let temp = curent.map(arr => arr.map(e => e))
   puzzle[rowI][colI]--
   let dRow = rowI
   let i = 0
   while (colI < curent[0].length && i < words[wordI].length) {
     if (!temp[rowI][colI].match(/[0-2]/)) {
       if (temp[rowI][colI] != words[wordI][i]) {
+            console.log(temp[rowI][colI],words[wordI][i] );
+
         puzzle[dRow][colI]++
         return null
       }
@@ -268,7 +272,7 @@ function placeWordCol(puzzle, words, wordI, curent, rowI, colI) {
     i++
     rowI++
   }
-curent=temp
+  curent=temp
   words.splice(wordI, 1)
   return { puzzle, curent, words }
 }
